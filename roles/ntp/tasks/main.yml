@@ -1,0 +1,37 @@
+---
+- name: Install NTP
+  become: yes
+  yum:
+    name: ntp
+    state: latest
+
+- name: Remove Original NTP Configuration
+  become: yes
+  file:
+    path: /etc/ntp.conf
+    state: absent
+
+- name: Brief Wait To Make Sure File Deleted
+  wait_for:
+    timeout: 10
+
+- name: Create New NTP Configuration
+  become: yes
+  file:
+    path: /etc/ntp.conf
+    state: touch
+
+- name: Insert New NTP Configuration
+  become: yes
+  blockinfile:
+    path: /etc/ntp.conf
+    block: |
+      driftfile /var/lib/ntp/drift
+      restrict default nomodify notrap nopeer noquery
+
+      restrict 127.0.0.1
+      restrict ::1
+      server {{item.server_address}} iburst
+    marker: "#{mark} Managed By Ansible"
+  loop:
+    - {server_address: uk.pool.ntp.org}

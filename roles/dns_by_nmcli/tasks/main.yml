@@ -1,0 +1,9 @@
+---
+- name: Command To Update Network Manager
+  become: yes
+  command: nmcli con mod 'System eth0' ipv4.dns "8.8.8.8"
+
+- name: Restart Network Manager Service 
+  become: yes
+  command: systemctl restart NetworkManager.service
+

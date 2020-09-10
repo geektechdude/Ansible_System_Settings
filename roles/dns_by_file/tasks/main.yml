@@ -1,0 +1,27 @@
+---
+- name: Remove Original DNS Configuration
+  become: yes
+  file:
+    path: /etc/resolv.conf
+    state: absent
+
+- name: Brief Wait To Make Sure File Deleted
+  wait_for:
+    timeout: 10
+
+- name: Create New DNS Configuration
+  become: yes
+  file:
+    path: /etc/resolv.conf
+    state: touch
+
+- name: Insert New NTP Configuration
+  become: yes
+  blockinfile:
+    path: /etc/resolv.conf
+    block: |
+      search local
+      nameserver {{item.server_address}}
+    marker: "#{mark} Managed By Ansible"
+  loop:
+    - {server_address: 8.8.8.8}
